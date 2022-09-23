@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <style>
+        #headings {
+            text-align: center;
+        }
+
+        table, th, td {
+            border: 1px solid;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            column-width: 100px;
+            height: 20px;
+            padding: 5px;
+            text-align: center;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+</head>
+
+<body>
+<div class="print" id="print">
+    <button onclick="window.print()">Print/Save</button>
+</div>
+<div id="headings">
+    <h3>बिहार सरकार</h3>
+    <h3>पृष्ट संख्या</h3>
+    <h3>स्वास्थ्य विभाग</h3>
+    <h3>आशा दावा प्रपत्र</h3>
+    <h5>(केवल ऑनलाइन भरने के लिए उपयोग करें)</h5>
+</div>
+<div id="intro"></div>
+<div>
+    <h3>(क)दैनिक सेवा/कार्य का विवरण</h3>>
+    <table>
+        <thead id="table-headers"></thead>
+        <tbody id="table-body"></tbody>
+    </table>
+</div>
+<div>
+    <h3>(ख)मासिक सेवा कार्य का विवरण(किये गये कार्य पर [✓] )</h3>
+    <table>
+        <tr>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    <tr>
+        <td>PC1.1</td>
+        <td>PC1.2</td>
+        <td>PC1.3</td>
+        <td>PC1.4</td>
+        <td>PC1.5</td>
+        <td>PI1.1</td>
+        <td>PC1.6</td>
+        <td>PC1.7</td>
+    </tr>
+    <tr>
+        <td>300/-रूपये प्रतिमाह</td>
+        <td>300/-रूपये प्रतिमाह</td>
+        <td>300/-रूपये प्रतिमाह</td>
+        <td>300/-रूपये प्रतिमाह</td>
+        <td>300/-रूपये प्रतिमाह</td>
+        <td>150/-रूपये प्रतिमाह</td>
+        <td>200/-रूपये प्रतिमाह</td>
+        <td>150/-रूपये प्रतिमाह</td>
+    </tr>
+    </table>
+</div>
+</body>
+<script>
+
+    const spinner = document.getElementById("spinner");
+    const print = document.getElementById('print');
+    const columnLanguageMap = new Map([
+        ['s_no', 'क्र. स.'],
+        ['code', 'सेवा/कार्य का कोड'],
+        ['rate', 'प्रोत्साहन राशि का सामान्य दर'],
+        ['beneficiary_count', 'लाभार्थियो की संख्या'],
+        ['total_claim_amount', 'दावा की गयी राशि'],
+        ['work_completion_date', 'कार्य पूर्ण की अंतिम तिथि'],
+        ['location_of_health_centre', 'प्रखंड का नाम / जिला अस्पताल'],
+        ['registration_code', 'पंजी का कोड'],
+        ['section', 'खंड'],
+        ['date_of_registration', 'पंजी में अंकित दिनांक'],
+        ['asha_signature', 'आशा फैसिलिटेटर का हस्ताक्षर']
+    ]);
+
+    const fetchDawaPrapatraData = async function () {
+        const url = new URL(window.location.href);
+        console.log("url:::::::updated", url);
+
+        const params = {
+            "name": "dawa prapatra",
+            "queryParams": {
+                "user_uuid": url.searchParams.get("userUUID"),
+                "from_date": url.searchParams.get("fromDate"),
+                "to_date": url.searchParams.get("toDate"),
+                "user_name": url.searchParams.get("userName")
+            }
+        };
+
+        const options = {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'auth-token': url.searchParams.get("AUTH-TOKEN")
+            },
+            body: JSON.stringify(params)
+        };
+
+        console.log("options:::::::", options);
+        const response = await fetch('https://staging.avniproject.org/executeQuery', options)
+        console.log("response::::::", response);
+        let responseJSON = await response.json();
+        console.log("responseJSON--->",responseJSON);
+        return responseJSON;
+    }
+
+    const fetchHeaders = () => {
+        let HTMLString = "<tr>";
+
+        columnLanguageMap.forEach((value, key) => {
+            HTMLString = HTMLString + '<th>' + value + '</th>';
+        });
+
+        return HTMLString.concat("</tr>")
+    }
+
+    const fetchData = (response) =>{
+        let HTMLString = "<tr>";
+        const data = response.data;
+        for (let row = 0; row < data.length; row++) {
+            columnLanguageMap.forEach((value, key) => {
+                let index = _.findIndex(response.headers, (header) => _.snakeCase(header) === key, 0);
+                if(key === "s_no")
+                    HTMLString = HTMLString + '<td>' + (row + 1) + '</td>';
+                else if(data[row][index])
+                    HTMLString = HTMLString + '<td>' + data[row][index] + '</td>';
+                else
+                    HTMLString = HTMLString + "<td></td>";
+            });
+        }
+
+        return HTMLString.concat("</tr>")
+    }
+
+    const fetchIntro = () => {
+        const url = new URL(window.location.href);
+
+        return `आशा का नाम ${url.searchParams.get("userName")} स्वास्थ केंद्र का नाम (location)___________ माह-वर्ष जिसके लिए प्रत्साहन राशि का दावा किया गया है ${url.searchParams.get("toDate")}`;
+}
+
+    const fetchHTMLString = (response) => {
+        console.log("newww");
+        const intro = fetchIntro();
+        console.log("intro:::", intro)
+
+       const tableHeaders = fetchHeaders();
+        console.log("tableHeaders:::", tableHeaders)
+
+        const tableData = fetchData(response);
+        console.log("tableData:::", tableData)
+
+        document.getElementById("intro").innerHTML = intro;
+        document.getElementById("table-headers").innerHTML = tableHeaders;
+        document.getElementById("table-body").innerHTML = tableData;
+    }
+
+    const renderHTML = async function () {
+       let response = await fetchDawaPrapatraData();
+       fetchHTMLString(response);
+    }
+
+    renderHTML();
+</script>
+</html>
