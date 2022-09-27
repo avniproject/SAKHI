@@ -194,7 +194,7 @@
         const data = response.data;
         for (let row = 0; row < data.length; row++) {
             columnLanguageMap.forEach((value, key) => {
-                let index = .findIndex(response.headers, (header) => .snakeCase(header) === key, 0);
+                let index = _.findIndex(response.headers, (header) => _.snakeCase(header) === key, 0);
 
                 if(key === "s_no"){
                     HTMLString = HTMLString + '<td>' + (row + 1) + '</td>' ;
