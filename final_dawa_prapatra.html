@@ -3,21 +3,67 @@
 
 <head>
     <style>
-        #headings {
-            text-align: center;
+        @media screen{
+
+            #headings {
+                display:flex;
+                flex-direction:column;
+                justify-content:center;
+                align-items:center;
+            }
+
+            table, th, td {
+                border: 1px solid;
+                border-collapse: collapse;
+            }
+
+            th, td {
+                column-width: 200px;
+                height: 30px;
+                padding: 5px;
+                text-align: center;
+            }
+            #main-footer{
+                width: 100%;
+                height: 90px;
+                white-space: nowrap;
+                overflow-x: auto;
+                margin-top: 5rem;
+            }
+            #footer-right{
+                margin-left: 30rem;
+            }
         }
 
-        table, th, td {
-            border: 1px solid;
-            border-collapse: collapse;
+        @media print{
+            #headings {
+                text-align: center;
+            }
+
+            table, th, td {
+                border: 1px solid;
+                border-collapse: collapse;
+            }
+
+            th, td {
+                column-width: 100%;
+                height: 30px;
+                padding: 5px;
+                text-align: center;
+            }
+            #main-footer{
+                width: 100%;
+                height: 90px;
+                white-space: nowrap;
+                overflow-x: auto;
+                margin-top: 4rem;
+            }
+            #footer-right{
+                margin-left: 18rem;
+            }
+
         }
 
-        th, td {
-            column-width: 100px;
-            height: 20px;
-            padding: 5px;
-            text-align: center;
-        }
     </style>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -38,7 +84,7 @@
 </div>
 <div id="intro"></div>
 <div>
-    <h3>(क)दैनिक सेवा/कार्य का विवरण</h3>>
+    <h3>(क)दैनिक सेवा/कार्य का विवरण</h3>
     <table>
         <thead id="table-headers"></thead>
         <tbody id="table-body"></tbody>
@@ -57,31 +103,36 @@
             <td></td>
             <td></td>
         </tr>
-    <tr>
-        <td>PC1.1</td>
-        <td>PC1.2</td>
-        <td>PC1.3</td>
-        <td>PC1.4</td>
-        <td>PC1.5</td>
-        <td>PI1.1</td>
-        <td>PC1.6</td>
-        <td>PC1.7</td>
-    </tr>
-    <tr>
-        <td>300/-रूपये प्रतिमाह</td>
-        <td>300/-रूपये प्रतिमाह</td>
-        <td>300/-रूपये प्रतिमाह</td>
-        <td>300/-रूपये प्रतिमाह</td>
-        <td>300/-रूपये प्रतिमाह</td>
-        <td>150/-रूपये प्रतिमाह</td>
-        <td>200/-रूपये प्रतिमाह</td>
-        <td>150/-रूपये प्रतिमाह</td>
-    </tr>
+        <tr>
+            <td>PC1.1</td>
+            <td>PC1.2</td>
+            <td>PC1.3</td>
+            <td>PC1.4</td>
+            <td>PC1.5</td>
+            <td>PI1.1</td>
+            <td>PC1.6</td>
+            <td>PC1.7</td>
+        </tr>
+
+        <tr>
+            <td>300/-रूपये प्रतिमाह</td>
+            <td>300/-रूपये प्रतिमाह</td>
+            <td>300/-रूपये प्रतिमाह</td>
+            <td>300/-रूपये प्रतिमाह</td>
+            <td>300/-रूपये प्रतिमाह</td>
+            <td>150/-रूपये प्रतिमाह</td>
+            <td>200/-रूपये प्रतिमाह</td>
+            <td>150/-रूपये प्रतिमाह</td>
+        </tr>
     </table>
+</div>
+<div id="main-footer">
+    <span style="display: inline-block;"><h3 id="footer-left">कुल दावा की गई राशि (क + ख) - </h3></span>
+    <span style="display: inline-block;"><h3 id="footer-right">हस्ताक्षर</h3></span>
 </div>
 </body>
 <script>
-
+    const simp = "hello"
     const spinner = document.getElementById("spinner");
     const print = document.getElementById('print');
     const columnLanguageMap = new Map([
@@ -100,7 +151,6 @@
 
     const fetchDawaPrapatraData = async function () {
         const url = new URL(window.location.href);
-        console.log("url:::::::updated", url);
 
         const params = {
             "name": "dawa prapatra",
@@ -121,11 +171,11 @@
             body: JSON.stringify(params)
         };
 
-        console.log("options:::::::", options);
+
         const response = await fetch('https://staging.avniproject.org/executeQuery', options)
-        console.log("response::::::", response);
+
         let responseJSON = await response.json();
-        console.log("responseJSON--->",responseJSON);
+
         return responseJSON;
     }
 
@@ -144,44 +194,66 @@
         const data = response.data;
         for (let row = 0; row < data.length; row++) {
             columnLanguageMap.forEach((value, key) => {
-                let index = _.findIndex(response.headers, (header) => _.snakeCase(header) === key, 0);
-                if(key === "s_no")
-                    HTMLString = HTMLString + '<td>' + (row + 1) + '</td>';
-                else if(data[row][index])
-                    HTMLString = HTMLString + '<td>' + data[row][index] + '</td>';
-                else
+                let index = .findIndex(response.headers, (header) => .snakeCase(header) === key, 0);
+
+                if(key === "s_no"){
+                    HTMLString = HTMLString + '<td>' + (row + 1) + '</td>' ;
+                }
+                else if(data[row][index]){
+                    HTMLString = HTMLString + '<td>' + data[row][index] + '</td>' ;
+                }
+                else{
                     HTMLString = HTMLString + "<td></td>";
+                }
+
             });
+
+            HTMLString += "</tr>";
+
         }
 
-        return HTMLString.concat("</tr>")
+        return HTMLString.concat("</tr>");
     }
 
     const fetchIntro = () => {
         const url = new URL(window.location.href);
+        // let todaysDate = date.getFullYear() + '-' + (date.getMonth() + 1) + '-' + date.getDate();
 
-        return `आशा का नाम ${url.searchParams.get("userName")} स्वास्थ केंद्र का नाम (location)___________ माह-वर्ष जिसके लिए प्रत्साहन राशि का दावा किया गया है ${url.searchParams.get("toDate")}`;
-}
+        var options = { year: 'numeric', month: 'long' };
+        var today  = new Date();
+
+
+        return `आशा का नाम ${url.searchParams.get("userName")} स्वास्थ केंद्र का नाम ___________ माह-वर्ष जिसके लिए प्रत्साहन राशि का दावा किया गया है -- ${today.toLocaleDateString("hi-IN",options)}`;
+    }
 
     const fetchHTMLString = (response) => {
-        console.log("newww");
         const intro = fetchIntro();
-        console.log("intro:::", intro)
 
-       const tableHeaders = fetchHeaders();
-        console.log("tableHeaders:::", tableHeaders)
+        const tableHeaders = fetchHeaders();
 
         const tableData = fetchData(response);
-        console.log("tableData:::", tableData)
+
+        const alreadyPresentData = document.getElementById('footer-left').innerHTML;
+        let num = 3;
+        let totalAmount = 0;
+        function countTotalAmount(num, totalAmount) {
+
+            for ( let i=0; i<response.data.length ; i++ ) {
+                let amount = parseInt(response.data[i][num])
+                totalAmount += amount;
+            }
+            return totalAmount;
+        }
 
         document.getElementById("intro").innerHTML = intro;
         document.getElementById("table-headers").innerHTML = tableHeaders;
         document.getElementById("table-body").innerHTML = tableData;
+        document.getElementById('footer-left').innerHTML = alreadyPresentData + '  ' + countTotalAmount(num, totalAmount);
     }
 
     const renderHTML = async function () {
-       let response = await fetchDawaPrapatraData();
-       fetchHTMLString(response);
+        let response = await fetchDawaPrapatraData();
+        fetchHTMLString(response);
     }
 
     renderHTML();
